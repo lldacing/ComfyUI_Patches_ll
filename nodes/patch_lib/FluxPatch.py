@@ -175,6 +175,12 @@ def flux_forward_orig(
                 if i < len(control_o):
                     add = control_o[i]
                     if add is not None:
+                        img_slice = img[:, txt.shape[1]:, ...]
+                        if img_slice.shape[1] != add.shape[1]:
+                            padding_size = img_slice.shape[1] - add.shape[1]
+                            if padding_size > 0:
+                                padding = torch.zeros(add.shape[0], padding_size, add.shape[2], device=add.device, dtype=add.dtype)
+                                add = torch.cat([add, padding], dim=1)
                         img[:, txt.shape[1]:, ...] += add
 
         return img
@@ -271,6 +277,11 @@ def double_block_and_control_replace(i, block, img, txt=None, vec=None, pe=None,
         if i < len(control_i):
             add = control_i[i]
             if add is not None:
+                if img.shape[1] != add.shape[1]:
+                    padding_size = img.shape[1] - add.shape[1]
+                    if padding_size > 0:
+                        padding = torch.zeros(add.shape[0], padding_size, add.shape[2], device=add.device, dtype=add.dtype)
+                        add = torch.cat([add, padding], dim=1)
                 img += add
 
     del blocks_replace
